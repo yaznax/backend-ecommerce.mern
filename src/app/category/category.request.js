@@ -1,56 +1,60 @@
 const { default: slugify } = require("slugify");
 
-class CategoryRequest{
-    data;
-    file;
-    user;
-    constructor(req) {
-        this.data = req.body;
-        this.file = req.file;
-        this.user = req.authUser;
+class CategoryRequest {
+  data;
+  file;
+  user;
+  constructor(req) {
+    this.data = req.body;
+    this.file = req.file;
+    this.user = req.authUser;
+  }
+
+  createTransform = () => {
+    let payload = {
+      ...this.data,
+    };
+
+    if (this.file) {
+      payload.image = this.file.filename;
+    } else {
+      payload.image = null;
     }
 
-    createTransform = () => {
-        let payload = {
-            ...this.data
-        }
+    payload.slug = slugify(this.data.title, { lower: true });
 
-        if(this.file){
-            payload.image = this.file.filename;
-        } else {
-            payload.image = null
-        }
-
-        payload.slug = slugify(this.data.title, {lower: true})
-        // form-data
-        // parentId => id, 'null'
-        if(!this.data.parentId || this.data.parentId === 'null' || this.data.parentId === ''){
-            payload.parentId = null
-        }
-
-        payload.createdBy = this.user._id;
-        return payload
+    if (
+      !this.data.parentId ||
+      this.data.parentId === "null" ||
+      this.data.parentId === ""
+    ) {
+      payload.parentId = null;
     }
-    
-    updateTransform = (category) => {
-        let payload = {
-            ...this.data
-        }
 
-        if(this.file){
-            payload.image = this.file.filename;
-        } else {
-            payload.image = category.image
-        }
+    payload.createdBy = this.user._id;
+    return payload;
+  };
 
-        // payload.slug = category.slug
-        
-        if(!this.data.parentId || this.data.parentId === 'null' || this.data.parentId === ''){
-            payload.parentId = null
-        }
+  updateTransform = (category) => {
+    let payload = {
+      ...this.data,
+    };
 
-        // payload.createdBy = this.user._id;
-        return payload
+    if (this.file) {
+      payload.image = this.file.filename;
+    } else {
+      payload.image = category.image;
     }
+
+    if (
+      !this.data.parentId ||
+      this.data.parentId === "null" ||
+      this.data.parentId === ""
+    ) {
+      payload.parentId = null;
+    }
+
+    return payload;
+  };
 }
 module.exports = CategoryRequest;
